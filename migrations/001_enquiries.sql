@@ -1,0 +1,1 @@
+CREATE TABLE enquiries (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), destination text NOT NULL, travel_date date, guests text NOT NULL, name text NOT NULL, phone text NOT NULL, email text NOT NULL, created_at timestamptz NOT NULL DEFAULT now())

@@ -1,0 +1,1 @@
+Local image assets for the Mesmerizing Kashmir Tours and Travels site. SVG artwork is intentionally self-contained so pages do not depend on third-party image hosts.

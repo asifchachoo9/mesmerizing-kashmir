@@ -1,0 +1,1 @@
+(()=>{const s=document.createElement('link');s.rel='stylesheet';s.href='/image-fix.css?v=7';document.head.appendChild(s)})();

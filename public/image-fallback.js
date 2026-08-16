@@ -1,0 +1,1 @@
+document.addEventListener('error',e=>{const el=e.target;if(el&&el.tagName==='IMG'){el.dataset.imageError='true';el.removeAttribute('src');el.classList.add('image-fallback')}} ,true);
