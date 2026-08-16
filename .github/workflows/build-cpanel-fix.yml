@@ -1,0 +1,42 @@
+name: Build cPanel package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/**'
+      - '.htaccess'
+      - 'public/.htaccess'
+      - '.github/workflows/build-cpanel-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Build cPanel ZIP
+        run: |
+          rm -rf /tmp/cpanel-package
+          mkdir -p /tmp/cpanel-package
+          cp -a public/. /tmp/cpanel-package/
+          cp .htaccess /tmp/cpanel-package/.htaccess
+          cd /tmp/cpanel-package
+          zip -qr "$GITHUB_WORKSPACE/fix/fix 1.zip" .
+
+      - name: Commit ZIP to fix folder
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "fix/fix 1.zip"
+          if git diff --cached --quiet; then
+            echo "No ZIP changes to commit."
+          else
+            git commit -m "Update Fix 1 cPanel ZIP [skip ci]"
+            git push
+          fi
