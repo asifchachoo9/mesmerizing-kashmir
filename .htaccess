@@ -1,11 +1,10 @@
-# Mesmerizing Kashmir - cPanel / Apache deployment
-# Point cPanel's document root at the repository root (or public_html).
-# The site itself lives in /public.
-
+# Mesmerizing Kashmir - cPanel / Apache static deployment
 Options -MultiViews
 DirectoryIndex public/index.html
-
 RewriteEngine On
+
+# Block Hatchable-only runtime assets when hosted independently.
+RewriteRule ^__hatchable(?:/|$) - [R=404,L,NC]
 
 # Never rewrite existing files/directories in the repository root.
 RewriteCond %{REQUEST_URI} !^/public(?:/|$) [NC]
@@ -13,7 +12,7 @@ RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} -f [OR]
 RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Serve the static site from /public while keeping the public URL clean.
+# Serve the static site from /public while keeping public URLs clean.
 RewriteCond %{REQUEST_URI} !^/public(?:/|$) [NC]
 RewriteRule ^(.*)$ public/$1 [L]
 
@@ -31,4 +30,13 @@ RewriteRule ^(.*)$ public/$1 [L]
 
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# If cPanel has mod_substitute enabled, remove Hatchable bootstrap tags
+# from HTML responses without requiring any Hatchable runtime.
+<IfModule mod_substitute.c>
+  AddOutputFilterByType SUBSTITUTE text/html
+  SubstituteMaxLineLength 2m
+  Substitute "s|<script[^>]*src=[\"'][^\"']*/__hatchable/[^\"']*[\"'][^>]*></script>||i"
+  Substitute "s|<script>[^<]*__HATCHABLE__[^<]*</script>||i"
 </IfModule>
