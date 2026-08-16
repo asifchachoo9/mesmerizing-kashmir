@@ -1,10 +1,11 @@
-name: Build changed-source fix ZIP
+name: Build changed-source fix ZIPs
 
 on:
   push:
     branches: [main]
     paths:
       - 'public/**'
+      - '.htaccess'
       - 'fix/**'
       - '.github/workflows/build-cpanel-fix.yml'
   workflow_dispatch:
@@ -19,24 +20,31 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Build Fix 1 ZIP from changed source files only
+      - name: Build Fix 1 ZIP from changed source file only
         run: |
-          rm -rf /tmp/fix-package
-          mkdir -p /tmp/fix-package
-          # Fix 1 changed only this source file. Keep the ZIP as a patch, not a full site.
-          mkdir -p /tmp/fix-package/public
-          cp public/index.html /tmp/fix-package/public/index.html
-          cd /tmp/fix-package
+          rm -rf /tmp/fix1
+          mkdir -p /tmp/fix1/public
+          cp public/index.html /tmp/fix1/public/index.html
+          cd /tmp/fix1
           zip -qr "$GITHUB_WORKSPACE/fix/fix 1.zip" public/index.html
 
-      - name: Commit changed-source ZIP
+      - name: Build Fix 2 ZIP from changed cPanel source files only
+        run: |
+          rm -rf /tmp/fix2
+          mkdir -p /tmp/fix2/public
+          cp "$GITHUB_WORKSPACE/.htaccess" /tmp/fix2/.htaccess
+          cp "$GITHUB_WORKSPACE/public/.htaccess" /tmp/fix2/public/.htaccess
+          cd /tmp/fix2
+          zip -qr "$GITHUB_WORKSPACE/fix/fix 2.zip" .htaccess public/.htaccess
+
+      - name: Commit changed-source ZIPs
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "fix/fix 1.zip"
+          git add "fix/fix 1.zip" "fix/fix 2.zip"
           if git diff --cached --quiet; then
             echo "No ZIP changes to commit."
           else
-            git commit -m "Update Fix 1 changed-source ZIP [skip ci]"
+            git commit -m "Update changed-source fix ZIPs [skip ci]"
             git push
           fi
