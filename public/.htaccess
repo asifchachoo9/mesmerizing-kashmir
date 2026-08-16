@@ -1,4 +1,5 @@
 # Static-site defaults for cPanel when /public is used as the document root.
+# Fix 1: keep this file synchronized with the cPanel package built from /public.
 Options -MultiViews
 DirectoryIndex index.html
 
