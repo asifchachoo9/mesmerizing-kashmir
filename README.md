@@ -1,5 +1,3 @@
-[![Deploy to Hatchable](https://hatchable.com/deploy-button.svg)](https://hatchable.com/deploy?repo=https://github.com/asifchachoo9/mesmerizing-kashmir)
-
 # Mesmerizing Kashmir Inspired Website
 
 A Kashmir travel website built on Hatchable.
