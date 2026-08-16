@@ -1,0 +1,26 @@
+name: Build cPanel package
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare cPanel package
+        run: |
+          rm -rf cpanel-package
+          mkdir -p cpanel-package
+          cp -a public/. cpanel-package/
+          find cpanel-package -type d -name .git -prune -exec rm -rf {} +
+          cd cpanel-package
+          zip -r ../mesmerizing-kashmir-cpanel.zip . -x '*.DS_Store'
+      - name: Upload cPanel ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: mesmerizing-kashmir-cpanel
+          path: mesmerizing-kashmir-cpanel.zip
+          retention-days: 30
