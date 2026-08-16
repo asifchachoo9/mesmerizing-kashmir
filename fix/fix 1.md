@@ -1,31 +1,26 @@
 # Fix 1 — Homepage CSS / cPanel asset loading
 
 ## Reported symptom
-The supplied screenshot shows the homepage rendering as plain browser HTML: default Times-style text, blue underlined links, unstyled buttons, no hero background, no layout, and no navigation styling.
+The homepage was rendering as plain browser HTML: default Times-style text, blue underlined links, unstyled buttons, no hero background, no layout, and no navigation styling.
 
-## Root cause addressed
-The site must work when cPanel uses either the repository root or the `public/` directory as the document root. The repository includes Apache rules for both arrangements, with the root `.htaccess` serving static files from `public/` while keeping clean public URLs.
+## Source file changed for Fix 1
+- `public/index.html`
 
-## Source files updated
-- `public/index.html` — standalone homepage with no Hatchable runtime/bootstrap dependency.
-- `.htaccess` — cPanel root deployment and `/public` asset routing.
-- `public/.htaccess` — direct `/public` document-root deployment.
-- Existing CSS/JS/media files remain the source of truth.
+The homepage source was cleaned of the remaining Hatchable runtime/bootstrap markup and kept as a standalone cPanel page.
 
-## cPanel package rule
-Every corrective change must update the actual source file first. After the source update, the cPanel package must also be rebuilt. The GitHub Actions workflow `.github/workflows/build-cpanel-fix.yml` creates `fix/fix 1.zip` from the current `public/` source plus the root `.htaccess`.
+## ZIP rule
+`fix/fix 1.zip` is a **patch ZIP**, not a full website package. It contains **only the source file changed for Fix 1**:
 
-## Verification target
-After extracting the ZIP into cPanel, the homepage must show:
+```text
+public/index.html
+```
 
-- styled Mesmerizing Kashmir header
-- hero image/background
-- Jost typography
-- gold/teal buttons
-- destination cards
-- package cards
-- responsive navigation
-- all existing sections and media
+Do not extract Fix 1 as a complete fresh website. Replace the matching source file in the existing cPanel site.
 
 ## Project rule
-For future fixes, update the real source file first and then update the corresponding numbered package in `/fix/`. Use sequential names such as `fix 2.md` and `fix 2.zip`; do not create unrelated files inside `/fix/`.
+For every future fix:
+1. Update the real website source file(s) first.
+2. Record the exact changed source file(s) in `fix/fix N.md`.
+3. Create `fix/fix N.zip` containing **only those changed source file(s)**.
+4. Never put the full `public/` website into a numbered fix ZIP.
+5. Continue sequentially with `fix 2`, `fix 3`, etc.
