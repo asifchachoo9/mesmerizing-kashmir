@@ -1,42 +1,83 @@
-# Mesmerizing Kashmir - cPanel / Apache static deployment
+# Mesmerizing Kashmir — Apache / cPanel / LiteSpeed
+# Root .htaccess for deployments where the domain document root is the repository root.
+# Nginx/OpenLiteSpeed installations that do not read .htaccess need equivalent server rules.
+
 Options -MultiViews
 DirectoryIndex public/index.html
 RewriteEngine On
 
-# Block Hatchable-only runtime assets when hosted independently.
-RewriteRule ^__hatchable(?:/|$) - [R=404,L,NC]
+# ------------------------------------------------------------
+# Basic security / error handling
+# ------------------------------------------------------------
+ErrorDocument 404 /404.html
 
-# Never rewrite existing files/directories in the repository root.
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# Do not expose deployment/runtime folders.
+RewriteRule ^(?:\.git|\.github|__hatchable)(?:/|$) - [R=404,L,NC]
+
+# Never internally rewrite an existing root-level file/directory.
 RewriteCond %{REQUEST_URI} !^/public(?:/|$) [NC]
-RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} -f [OR]
-RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Serve the static site from /public while keeping public URLs clean.
+# ------------------------------------------------------------
+# Serve /public as the web root without showing /public in URLs
+# ------------------------------------------------------------
 RewriteCond %{REQUEST_URI} !^/public(?:/|$) [NC]
 RewriteRule ^(.*)$ public/$1 [L]
 
-# Basic browser caching for static assets.
+# ------------------------------------------------------------
+# Compression — only when the hosting module is available
+# ------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css
+  AddOutputFilterByType DEFLATE application/xml application/xhtml+xml application/rss+xml
+  AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# ------------------------------------------------------------
+# Browser caching — safe defaults for a static website
+# ------------------------------------------------------------
 <IfModule mod_expires.c>
   ExpiresActive On
+  ExpiresDefault "access plus 1 hour"
+  ExpiresByType text/html "access plus 1 hour"
   ExpiresByType text/css "access plus 7 days"
   ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType application/json "access plus 1 hour"
   ExpiresByType image/jpeg "access plus 30 days"
   ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/gif "access plus 30 days"
   ExpiresByType image/webp "access plus 30 days"
   ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/x-icon "access plus 30 days"
+  ExpiresByType font/woff "access plus 30 days"
   ExpiresByType font/woff2 "access plus 30 days"
 </IfModule>
 
+# ------------------------------------------------------------
+# Optional cache-control headers
+# ------------------------------------------------------------
 <IfModule mod_headers.c>
-  Header set X-Content-Type-Options "nosniff"
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+  <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico|woff|woff2)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
 </IfModule>
 
-# If cPanel has mod_substitute enabled, remove Hatchable bootstrap tags
-# from HTML responses without requiring any Hatchable runtime.
+# If mod_substitute is available, strip Hatchable-only runtime tags.
 <IfModule mod_substitute.c>
   AddOutputFilterByType SUBSTITUTE text/html
   SubstituteMaxLineLength 2m
   Substitute "s|<script[^>]*src=[\"'][^\"']*/__hatchable/[^\"']*[\"'][^>]*></script>||i"
   Substitute "s|<script>[^<]*__HATCHABLE__[^<]*</script>||i"
-</IfModule>
+</IfModule
