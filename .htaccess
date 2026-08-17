@@ -6,9 +6,6 @@ Options -MultiViews
 DirectoryIndex public/index.html
 RewriteEngine On
 
-# ------------------------------------------------------------
-# Basic security / error handling
-# ------------------------------------------------------------
 ErrorDocument 404 /404.html
 
 <IfModule mod_headers.c>
@@ -17,24 +14,16 @@ ErrorDocument 404 /404.html
   Header always set X-Frame-Options "SAMEORIGIN"
 </IfModule>
 
-# Do not expose deployment/runtime folders.
 RewriteRule ^(?:\.git|\.github|__hatchable)(?:/|$) - [R=404,L,NC]
 
-# Never internally rewrite an existing root-level file/directory.
 RewriteCond %{REQUEST_URI} !^/public(?:/|$) [NC]
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# ------------------------------------------------------------
-# Serve /public as the web root without showing /public in URLs
-# ------------------------------------------------------------
 RewriteCond %{REQUEST_URI} !^/public(?:/|$) [NC]
 RewriteRule ^(.*)$ public/$1 [L]
 
-# ------------------------------------------------------------
-# Compression — only when the hosting module is available
-# ------------------------------------------------------------
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css
   AddOutputFilterByType DEFLATE application/xml application/xhtml+xml application/rss+xml
@@ -42,9 +31,6 @@ RewriteRule ^(.*)$ public/$1 [L]
   AddOutputFilterByType DEFLATE image/svg+xml
 </IfModule>
 
-# ------------------------------------------------------------
-# Browser caching — safe defaults for a static website
-# ------------------------------------------------------------
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresDefault "access plus 1 hour"
@@ -62,9 +48,6 @@ RewriteRule ^(.*)$ public/$1 [L]
   ExpiresByType font/woff2 "access plus 30 days"
 </IfModule>
 
-# ------------------------------------------------------------
-# Optional cache-control headers
-# ------------------------------------------------------------
 <IfModule mod_headers.c>
   <FilesMatch "\.(css|js)$">
     Header set Cache-Control "public, max-age=604800"
@@ -74,10 +57,9 @@ RewriteRule ^(.*)$ public/$1 [L]
   </FilesMatch>
 </IfModule>
 
-# If mod_substitute is available, strip Hatchable-only runtime tags.
 <IfModule mod_substitute.c>
   AddOutputFilterByType SUBSTITUTE text/html
   SubstituteMaxLineLength 2m
   Substitute "s|<script[^>]*src=[\"'][^\"']*/__hatchable/[^\"']*[\"'][^>]*></script>||i"
   Substitute "s|<script>[^<]*__HATCHABLE__[^<]*</script>||i"
-</IfModule
+</IfModule>
